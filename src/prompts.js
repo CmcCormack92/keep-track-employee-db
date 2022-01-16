@@ -1,16 +1,9 @@
 const inquirer = require('inquirer');
+const db = require('../db/connection');
+const { addDept, addEmployee, updateEmp, addRole } = require('../utils');
 
-const mainPrompt = [
-        {
-            type: 'list',
-            name: 'options',
-            message: 'Please choose one of the following options:',
-            choices: ['View all departments', 'View all positions', 'View all employees', 'Add a department', 'Add a position', 'Add an employee', 'Update an employee role']
-        }
-    ];
-
-
-const newDepartment = [
+const newDepartment = () => {
+    inquirer.prompt([
         {
             type: 'input',
             name: 'name',
@@ -24,51 +17,58 @@ const newDepartment = [
                 }
             }
         }
-    ];
+    ]).then(addDept);
+};
 
-const newPosition = [
-        {
-            type: 'input',
-            name: 'title',
-            message: 'Enter new position title!',
-            validate: titleInput => {
-                if (titleInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the position title!");
-                    return false;
-                }
-            }
-        },
-        {
-            type: 'number',
-            name: 'salary',
-            message: 'Enter the yearly salary for this position!',
-            validate: salaryInput => {
-                if (salaryInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the position's salary!");
-                    return false;
-                }
-            }
-        },
-        {
-            type: 'input',
-            name: 'department',
-            message: 'Enter the department this position is in!',
-            validate: departmentInput => {
-                if (departmentInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the department!");
-                    return false;
-                }
-            }
+const newRole = () => {
+    const sql = `SELECT department.dept_name, department.id FROM department`;
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.log(err)
+            return;
         }
-    ];
+        const dept = data.map(({ id, dept_name }) => ({ name: dept_name, value: id }));
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'title',
+                message: 'Enter new role title!',
+                validate: titleInput => {
+                    if (titleInput) {
+                        return true;
+                    } else {
+                        console.log("Please enter the role title!");
+                        return false;
+                    }
+                }
+            },
+            {
+                type: 'number',
+                name: 'salary',
+                message: 'Enter the yearly salary for this role!',
+                validate: salaryInput => {
+                    if (salaryInput) {
+                        return true;
+                    } else {
+                        console.log("Please enter the position's salary!");
+                        return false;
+                    }
+                }
+            },
+            {
+                type: 'list',
+                name: 'department',
+                message: 'What department is this role under?',
+                choices: dept
+            }
+        ]).then(addRole);
+    });
+};
 
-const newEmployee = [
+
+
+const newEmployee = () => {
+    inquirer.prompt([
         {
             type: 'input',
             name: 'firstName',
@@ -94,49 +94,89 @@ const newEmployee = [
                     return false;
                 }
             }
-        },
-        {
-            type: 'input',
-            name: 'position',
-            message: 'Enter the employee position!',
-            validate: positionInput => {
-                if (positionInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the employee position!");
-                    return false;
-                }
-            }
-        },
-        {
-            type: 'input',
-            name: 'manager',
-            message: 'Enter the manager of this employee',
-            validate: managerInput => {
-                if (managerInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the employee manager!");
-                    return false;
-                }
-            }
         }
-    ];
-
-const updateEmployee = [
-        {
-            type: 'input',
-            name: 'newPosition',
-            message: 'Enter new employee position!',
-            validate: newPositionInput => {
-                if (newPositionInput) {
-                    return true;
-                } else {
-                    console.log("Please enter the new employee position!");
-                    return false;
-                }
+    ]).then((name) => {
+        answers = [{ firstName: name.firstName, lastName: name.lastName }]
+        const sqlRole = `SELECT role.title, role.id FROM role;`;
+        db.query(sqlRole, (err, data) => {
+            if (err) {
+                console.log(err)
+                return;
             }
-        }
-    ];
+            const roles = data.map(({ id, title }) => ({ name: title, value: id }));
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'What role is this employee?',
+                    choices: roles
+                }
+            ]).then(roleResult => {
+                const role = { role: roleResult.role };
+                answers.push(role);
+                const sqlMan = `SELECT first_name, last_name, id FROM employee WHERE manager_id IS NULL;`
+                db.query(sqlMan, (err, data) => {
+                    if (err) {
+                        console.log(err)
+                        return;
+                    }
+                    const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + ' ' + last_name, value: id }));;
+                    inquirer.prompt([
+                        {
+                            type: 'list',
+                            name: 'manager',
+                            message: 'Choose the manager this employee is under!',
+                            choices: managers
+                        }
+                    ]).then(manResult => {
+                        const manager = { manager: manResult.manager };
+                        answers.push(manager);
+                        addEmployee(answers);
+                    })
+                });
+            });
+        });
+    });
+};
 
-module.exports = {mainPrompt, newDepartment, newPosition, newEmployee, updateEmployee};
+const updateEmployee = () => {
+    const sql = `SELECT employee.first_name, employee.last_name, employee.id FROM employee;`;
+    db.query(sql, (err, data) => {
+        if (err) {
+            console.log(err)
+            return;
+        }
+        const employees = data.map(({ id, first_name, last_name }) => ({ name: first_name + ' ' + last_name, value: id }));
+        inquirer.prompt([
+            {
+                type: 'list',
+                name: 'employee',
+                message: 'Which employees role would you like to change?',
+                choices: employees
+            }
+        ]).then(employeeResult => {
+            answers = [{employee: employeeResult.employee}]
+            const sqlRole = `SELECT role.title, role.id FROM role;`;
+            db.query(sqlRole, (err, data) => {
+                if (err) {
+                    console.log(err)
+                    return;
+                }
+                const roles = data.map(({ id, title }) => ({ name: title, value: id }));
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'newRole',
+                        message: 'Pick your employees new role!',
+                        choices: roles
+                    }
+                ]).then(roleResult => {
+                    const role = { role: roleResult.newRole };
+                    answers.push(role);
+                    updateEmp(answers);
+                })
+            });
+        });
+    });
+};
+module.exports = { newDepartment, newRole, newEmployee, updateEmployee };

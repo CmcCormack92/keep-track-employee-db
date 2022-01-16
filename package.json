@@ -3,5 +3,25 @@
     "console.table": "^0.10.0",
     "inquirer": "^8.2.0",
     "mysql2": "^2.3.3"
-  }
+  },
+  "name": "keep-track-employee-db",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CmcCormack92/keep-track-employee-db.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CmcCormack92/keep-track-employee-db/issues"
+  },
+  "homepage": "https://github.com/CmcCormack92/keep-track-employee-db#readme"
 }

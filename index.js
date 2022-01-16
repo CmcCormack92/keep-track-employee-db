@@ -1,30 +1,42 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
-const cTable = require('console.table');
-const {mainPrompt, newDepartment, newPosition, newEmployee, updateEmployee} = require('./src/prompts');
-const {viewDept, viewPositions, viewEmployees, addDept, addPos, addEmployee, updateEmp} = require('./utils/index');
-const { update } = require('lodash');
+const { newDepartment, newRole, newEmployee, updateEmployee} = require('./src/prompts');
+const { viewDept, viewRole, viewEmployees} = require('./utils/index');
 
-inquirer.prompt(mainPrompt)
-.then(answer => {
-    if (answer === 'View all departments'){
-        viewDept();
-    } 
-    else if (answer === 'View all positions') {
-        viewPositions();
-    }
-    else if (answer === 'View all employees') {
-        viewEmployees();
-    }
-    else if (answer === 'Add a department') {
-        addDept();
-    }
-    else if (answer === 'Add a position') {
-        addPos();
-    }
-    else if (answer === 'Add an employee') {
-        addEmployee();
-    } else {
-        updateEmp();
-    }
-})
+function init() {
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'options',
+            message: 'Please choose one of the following options:',
+            choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Exit']
+        }
+    ]).then(answer => {
+        if (answer.options === 'View all departments') {
+            return viewDept();
+        }
+        else if (answer.options === 'View all roles') {
+            return viewRole();
+        }
+        else if (answer.options === 'View all employees') {
+            return viewEmployees();
+        }
+        else if (answer.options === 'Add a department') {
+            return newDepartment();
+                
+        }
+        else if (answer.options === 'Add a role') {
+            return newRole();
+        }
+        else if (answer.options === 'Add an employee') {
+            return newEmployee();
+        } 
+        else if (answer.options === 'Update an employee role') {
+            return updateEmployee();
+        } else {
+            process.exit(0);
+        }
+    });
+};
+
+init();
