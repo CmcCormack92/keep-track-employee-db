@@ -1,7 +1,6 @@
 const db = require('../db/connection');
 const cTable = require('console.table');
 const inquirer = require('inquirer');
-// const {newDepartment, newRole, newEmployee, updateEmployee} = require('../src/prompts');
 
 const viewDept = () => {
   const sql = `SELECT * from department;`;
@@ -54,7 +53,6 @@ const addDept = (newDepartment) => {
       return;
     } else {
       viewDept();
-      next();
     }
   });
 };
@@ -68,7 +66,6 @@ const addRole = newRole => {
       return;
     } else {
       viewRole();
-      next();
     }
   });
 };
@@ -82,7 +79,6 @@ const addEmployee = answers => {
       return;
     } else {
       viewEmployees();
-      next();
     }
   });
 };
@@ -96,17 +92,9 @@ const updateEmp = answers => {
       return;
     } else {
      viewEmployees();
-     next();
     }
   });
 };
-
-
-
-
-
-
-
 
 const newDepartment = () => {
     inquirer.prompt([
@@ -170,8 +158,6 @@ const newRole = () => {
         ]).then(addRole);
     });
 };
-
-
 
 const newEmployee = () => {
     inquirer.prompt([
@@ -286,11 +272,6 @@ const updateEmployee = () => {
     });
 };
 
-
-
-
-
-
 function next() {
   inquirer.prompt([
       {
@@ -311,8 +292,7 @@ function next() {
           return viewEmployees();
       }
       else if (answer.options === 'Add a department') {
-          return newDepartment();
-              
+          return newDepartment();       
       }
       else if (answer.options === 'Add a role') {
           return newRole();
@@ -328,8 +308,5 @@ function next() {
   });
 };
 
+module.exports = { viewDept, viewRole, viewEmployees, newDepartment, newRole, newEmployee, updateEmployee };
 
-
-
-module.exports = { newDepartment, newRole, newEmployee, updateEmployee, addDept, addRole, addEmployee, updateEmp};
-// module.exports = {addDept, addRole, addEmployee, updateEmp};

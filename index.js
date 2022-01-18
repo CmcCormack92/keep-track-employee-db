@@ -1,8 +1,7 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
-// const { newDepartment, newRole, newEmployee, updateEmployee} = require('./src/prompts');
 const { viewDept, viewRole, viewEmployees, newDepartment, newRole, newEmployee, updateEmployee} = require('./utils/index');
-// const {next} = require('./utils/index');
+
 
 function init() {
     inquirer.prompt([
